@@ -1,0 +1,8 @@
+<div class="container">
+  <div class="title">Doors and pathways</div>
+  <ko-stage [config]="configStage" class="canvas-container">
+      <ko-layer>
+        <ko-circle [config]="configCircle" (click)="handleClick($event)"></ko-circle>
+      </ko-layer>
+    </ko-stage>
+</div>

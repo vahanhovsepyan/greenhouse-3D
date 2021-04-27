@@ -1,0 +1,16 @@
+<div class="container">
+  <div class="header">
+    <div class="back-button">
+      <span class="material-icons">arrow_back_ios</span>
+    </div>
+    <div class="title">Doors and pathways</div>
+  </div>
+  <ko-stage [config]="configStage" class="canvas-container">
+    <ko-layer>
+      <ko-circle
+        [config]="configCircle"
+        (click)="handleClick($event)"
+      ></ko-circle>
+    </ko-layer>
+  </ko-stage>
+</div>

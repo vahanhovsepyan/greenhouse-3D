@@ -1,0 +1,29 @@
+.container {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+
+    .header {
+        height: 60px;
+        width: 100%;
+        background-color: grey;
+        display: flex;
+
+        .back-button {
+            width: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .title {
+            font-size: 30px;
+            align-items: center;
+        }
+    }
+}

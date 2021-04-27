@@ -1,0 +1,8 @@
+<div class="container">
+  <div class="title">Review changes</div>
+  <ko-stage [config]="configStage" class="canvas-containe">
+      <ko-layer>
+        <ko-circle [config]="configCircle" (click)="handleClick($event)"></ko-circle>
+      </ko-layer>
+    </ko-stage>
+</div>

@@ -1,0 +1,303 @@
+<section #appContainer class="main"></section>
+
+<div class="overlay" *ngIf="view.openDimensions"></div>
+<div id="bay-dimensions" *ngIf="view.openDimensions">
+  <h3>
+    <span class="material-icons">change_history</span>
+    Dimensions
+  </h3>
+
+  <div class="forms">
+    <div>
+      <label class="label-title">Production bay</label>
+      <br />
+      <label for="width">Width of a span:</label>
+      <select name="width" [(ngModel)]="data.dimensions.production.width">
+        <option value="6.4">6.4</option>
+        <option value="8">8</option>
+        <option value="9.6">9.6</option>
+        <option value="12">12</option>
+        <option value="12.8">12.8</option>
+        <option value="16">16</option>
+        <option value="20">20</option>
+      </select>
+      <br />
+      <label for="height">Height under gutter:</label>
+      <select name="height" [(ngModel)]="data.dimensions.production.height">
+        <option value="2.5">2.5</option>
+        <option value="3">3</option>
+        <option value="3.5">3.5</option>
+        <option value="4">4</option>
+        <option value="4.5">4.5</option>
+        <option value="5">5</option>
+        <option value="5.5">5.5</option>
+        <option value="6">6</option>
+        <option value="6.5">6.5</option>
+        <option value="7">7</option>
+      </select>
+    </div>
+    <div>
+      <label class="label-title">Technical bay</label>
+      <br />
+      <label for="technical-width">Width of a span:</label>
+      <select
+        name="technical-width"
+        [(ngModel)]="data.dimensions.technical.width"
+      >
+        <option value="6.4">6.4</option>
+        <option value="8">8</option>
+        <option value="9.6">9.6</option>
+        <option value="12">12</option>
+        <option value="12.8">12.8</option>
+        <option value="16">16</option>
+        <option value="20">20</option>
+      </select>
+      <br />
+      <label for="technical-height">Height under gutter:</label>
+      <select
+        name="technical-height"
+        [(ngModel)]="data.dimensions.technical.height"
+      >
+        <option value="2.5">2.5</option>
+        <option value="3">3</option>
+        <option value="3.5">3.5</option>
+        <option value="4">4</option>
+        <option value="4.5">4.5</option>
+        <option value="5">5</option>
+        <option value="5.5">5.5</option>
+        <option value="6">6</option>
+        <option value="6.5">6.5</option>
+        <option value="7">7</option>
+      </select>
+    </div>
+    <div>
+      <label class="label-title">Heat Storage Tank</label>
+      <br />
+      <label for="heat-volume">Volume:</label>
+      <input
+        type="text"
+        value="1200"
+        [(ngModel)]="data.dimensions.heat.volume"
+      />m<sup>3</sup>
+    </div>
+    <div>
+      <label class="label-title">Sections</label>
+      <br />
+      <label for="bay-section-size">Steps size:</label>
+      <select name="bay-section-size" [(ngModel)]="data.dimensions.steps.size">
+        <option value="2">2.0</option>
+        <option value="2.5">2.5</option>
+        <option value="3">3</option>
+        <option value="3.5">3.5</option>
+        <option value="4">4</option>
+        <option value="4.5">4.5</option>
+        <option value="5">5</option>
+      </select>
+    </div>
+    <button type="submit" (click)="setDimensions()">Accept</button>
+  </div>
+</div>
+
+<div id="appElements" *ngIf="!view.openDimensions">
+  <div id="tools">
+    <div>
+      <div class="icon" (click)="addField('production', 'vertical')">
+        <img src="./assets/production-icon.svg" alt="" />
+      </div>
+      <div class="name">
+        <span (click)="addField('production', 'vertical')"
+          >Production Block</span
+        >
+        <p class="dimensions" (click)="view.openDimensions = true">
+          W: <span id="p_w">{{ data.dimensions.production.width }}</span> / H:
+          <span id="p_h">{{ data.dimensions.production.height }}</span>
+        </p>
+      </div>
+    </div>
+    <div>
+      <div class="icon" (click)="addField('technical', 'vertical')">
+        <img src="./assets/technical-icon.svg" alt="" />
+      </div>
+      <div class="name">
+        <span (click)="addField('technical', 'vertical')">Technical Area</span>
+        <p class="dimensions" (click)="view.openDimensions = true">
+          W: <span id="t_w">{{ data.dimensions.technical.width }}</span> / H:
+          <span id="t_h">{{ data.dimensions.technical.height }}</span>
+        </p>
+      </div>
+    </div>
+    <div (click)="addField('corridor', 'vertical')">
+      <div class="icon">
+        <img src="./assets/corridor.svg" alt="" />
+      </div>
+      <div class="name">
+        <span>Corridor</span>
+      </div>
+    </div>
+    <div>
+      <div class="icon">
+        <img src="./assets/heat.svg" alt="" />
+      </div>
+      <div class="name">
+        <span (click)="addField('heat')">Heat Storage Tank</span>
+        <p class="dimensions" (click)="view.openDimensions = true">
+          V: <span id="h_v">{{ data.dimensions.heat.volume }}</span
+          >m<sup>3</sup>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <section id="camera-settings">
+    <div (click)="resetCamera()">
+      <span class="material-icons"> control_camera </span>
+      <span> Reset Camera Position </span>
+    </div>
+  </section>
+
+  <div id="bayTools" *ngIf="tools.data.show" [attr.type]="tools.data.type">
+    <div class="title">Tools</div>
+    <div
+      (mousedown)="tools.addSection()"
+      title="Add Section"
+      class="add-section"
+      (mouseup)="tools.mouseup()"
+    >
+      <span class="material-icons"> exposure_plus_1 </span>
+      <span class="title">Add Section {{ tools.data.name }}</span>
+    </div>
+    <div
+      (mousedown)="tools.removeSection()"
+      title="Remove Section"
+      class="remove-section"
+      (mouseup)="tools.mouseup()"
+    >
+      <span class="material-icons"> exposure_neg_1 </span>
+      <span class="title">Remove Section</span>
+    </div>
+    <div
+      (click)="tools.duplicate()"
+      title="Duplicate"
+      class="duplicate"
+      *ngIf="!tools.data.differentFields"
+    >
+      <span class="material-icons"> content_copy </span>
+      <span class="title">Duplicate</span>
+    </div>
+    <div
+      (click)="tools.copy()"
+      title="Copy"
+      class="copy"
+      *ngIf="!tools.data.differentFields"
+    >
+      <span class="material-icons"> content_paste </span>
+      <span class="title">Copy</span>
+    </div>
+    <div
+      (click)="tools.rotate()"
+      title="Rotate"
+      class="rotate"
+      *ngIf="!tools.data.differentFields"
+    >
+      <span class="material-icons"> autorenew </span>
+      <span class="title">Rotate</span>
+    </div>
+    <div (click)="tools.remove()" title="Remove" class="remove">
+      <span class="material-icons"> close </span>
+      <span class="title">Remove</span>
+    </div>
+    <div
+      (click)="tools.unmark()"
+      title="Mark as Phase I"
+      *ngIf="tools.data.marked"
+      class="mark-i"
+    >
+      <span class="material-icons"> access_time </span>
+      <span class="title">Phase I</span>
+    </div>
+    <div
+      (click)="tools.mark()"
+      title="Mark as Phase II"
+      *ngIf="!tools.data.marked"
+      class="mark-ii"
+    >
+      <span class="material-icons"> access_time </span>
+      <span class="title">Phase II</span>
+    </div>
+  </div>
+
+  <div id="infoBox">
+    <div class="not-selected" *ngIf="!infobox.data.selected.type">
+      <h3>
+        <span>Production bays count: </span>
+        <span>{{ infobox.data.productionCount }}</span>
+      </h3>
+      <h3>
+        <span>Technical bays count: </span>
+        <span>{{ infobox.data.technicalCount }}</span>
+      </h3>
+      <h3>
+        <span>Heat storage tank count: </span>
+        <span>{{ infobox.data.heatCount }}</span>
+      </h3>
+      <h3>
+        <span>Heat storage tank volume: </span>
+        <span>{{ infobox.data.heatVolume }}</span>
+      </h3>
+      <h3>
+        <span>Production surface area: </span>
+        <span>{{ infobox.data.productionSurface }} m<sup>2</sup></span>
+      </h3>
+      <h3>
+        <span>Corridors surface area: </span>
+        <span>{{ infobox.data.corridorsSurface }} m<sup>2</sup></span>
+      </h3>
+      <h3>
+        <span>Technical surface area: </span>
+        <span>{{ infobox.data.technicalSurface }} m<sup>2</sup></span>
+      </h3>
+      <h3>
+        <span>Total surface area: </span>
+        <span>{{ infobox.data.totalSurface }} m<sup>2</sup></span>
+      </h3>
+    </div>
+    <div class="selected" *ngIf="infobox.data.selected.type == 'bay'">
+      <h3>
+        <span>Selected bay length: </span>
+        <span>{{ infobox.data.selectedBayLength }} m</span>
+      </h3>
+      <h3>
+        <span>Selected bays count: </span>
+        <span>{{ infobox.data.selectedBayCount }}</span>
+      </h3>
+      <h3>
+        <span>Selected surface area: </span>
+        <span>{{ infobox.data.selectedBaySurface }} m<sup>2</sup></span>
+      </h3>
+    </div>
+    <div class="selected" *ngIf="infobox.data.selected.type == 'corridor'">
+      <h3>
+        <span>Corridor length: </span>
+        <span>{{ infobox.data.selectedCorridorLength }} m</span>
+      </h3>
+      <h3>
+        <span>Corridor surface area: </span>
+        <span>{{ infobox.data.selectedCorridorSurface }} m<sup>2</sup></span>
+      </h3>
+    </div>
+    <div class="selected" *ngIf="infobox.data.selected.type == 'heat'">
+      <h3>
+        <span>HTS height: </span>
+        <span>{{ infobox.data.selectedHeatHeight }} m</span>
+      </h3>
+      <h3>
+        <span>HTS radius: </span>
+        <span>{{ infobox.data.selectedHeatRadius }} m</span>
+      </h3>
+      <h3>
+        <span>HTS volume: </span>
+        <span>{{ infobox.data.selectedHeatVolume }} m<sup>3</sup></span>
+      </h3>
+    </div>
+  </div>
+</div>

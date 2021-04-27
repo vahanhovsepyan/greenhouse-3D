@@ -1,0 +1,24 @@
+<div class="container">
+  <div class="header">
+    <div class="back-button">
+      <span class="material-icons">arrow_back_ios</span>
+    </div>
+    <div class="title">Doors and pathways</div>
+  </div>
+  <div class="canvas-container">
+    <ko-stage [config]="configStage">
+      <ko-layer>
+        <ko-rect
+          [config]="backgroundRect"
+          (click)="handleClick($event)"
+        ></ko-rect>
+      </ko-layer>
+    </ko-stage>
+  </div>
+  <div class="footer">
+    <button class="next_button">
+      <span>Publish</span>
+      <span class="material-icons"> keyboard_arrow_right </span>
+    </button>
+  </div>
+</div>
