@@ -55,6 +55,7 @@ export default {
   models: [
     {
       path: './assets/models/bay.gltf',
+      line: './assets/models/bay-line.gltf',
       type: 'gltf'
     },
   ],

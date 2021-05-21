@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import { BufferGeometryUtils } from "../utils/bufferGeometryUtils";
+import { GLTFLoader } from "../loaders/GLTFLoader";
 import Config from "../data/config";
 
 // Loads in a single object from the config file
@@ -16,13 +16,16 @@ export default class Model {
     this.marked = false;
     this.ref = null;
     this.field = null;
-    this.dimension = (dimension && dimension.dimension) || Object.assign({}, Config.dimension[this.type]);
-    this.speedWalking = 100;
+    this.dimension =
+      (dimension && dimension.dimension) ||
+      Object.assign({}, Config.dimension[this.type]);
+    this.speedWalking = 50;
     this.tmpPosition = new THREE.Vector3();
     this.time = null;
     this.duplicate = false;
     this.stepLines = [];
-    this.stepSize = (dimension && dimension.steps.size) || Config.dimension.steps.size;
+    this.stepSize =
+      (dimension && dimension.steps.size) || Config.dimension.steps.size;
 
     // onProgress callback
     // manager.onProgress = (item, loaded, total) => {
@@ -101,17 +104,30 @@ export default class Model {
   }
 
   initLines(group) {
-    const edges = new THREE.EdgesGeometry( this.obj.geometry );
-    const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x000000 } ) );
-    line.position.y = 10;
-    line.material.transparent = true;
-    line.material.opacity = 0.25;
-    line.scale.set(
-      0.01,
-      this.dimension.height,
-      this.dimension.width / 2
+    new GLTFLoader(this.manager).load(
+      Config.models[Config.model.selected].line,
+      (gltf) => {
+        const scene = gltf.scene;
+        let mesh;
+
+        scene.traverse((node) => {
+          if (node.isMesh) {
+            mesh = node;
+          }
+        });
+
+        const edges = new THREE.EdgesGeometry(mesh.geometry);
+        const line = new THREE.LineSegments(
+          edges,
+          new THREE.LineBasicMaterial({ color: 0x000000 })
+        );
+        line.position.y = 10;
+        line.material.transparent = true;
+        line.material.opacity = 0.25;
+        line.scale.set(0.1, this.dimension.height, this.dimension.width / 2);
+        this.obj.baseLine = line;
+      }
     );
-    this.obj.baseLine = line;
   }
 
   updateBoxSize() {
@@ -194,14 +210,14 @@ export default class Model {
 
   changePosition(point, mouseDown) {
     let coords = {
-      x: (point.x - this.field.group.position.x) / 100,
-      z: (point.z - this.field.group.position.z) / 100,
+      x: (point.x - this.field.group.position.x) / 111,
+      z: (point.z - this.field.group.position.z) / 111,
     };
     let direction = this.field.direction;
     let speed = this.speedWalking / this.field.bays.length;
 
     if (this.obj.selected && mouseDown && this.isFieldSelected()) {
-      if(direction == 'vertical') {
+      if (direction == "vertical") {
         this.field.group.translateX(coords.x * speed * this.time);
         this.field.group.translateZ(coords.z * speed * this.time);
       } else {
@@ -209,36 +225,41 @@ export default class Model {
         this.field.group.translateZ(-coords.x * speed * this.time);
       }
     } else if (this.obj.selected && mouseDown) {
-      direction == 'vertical' && this.obj.translateX(coords.x * speed * this.time);
-      direction == 'horizontal' && this.obj.translateX(coords.z * speed * this.time);
+      direction == "vertical" &&
+        this.obj.translateX(coords.x * speed * 5 * this.time);
+      direction == "horizontal" &&
+        this.obj.translateX(coords.z * speed * 5 * this.time);
     }
   }
 
   addSection() {
-    this.obj.scale.x = this.obj.scale.x + (this.stepSize / 2);
+    this.obj.scale.x = this.obj.scale.x + this.stepSize / 2;
 
-    if(this.obj.scale.x * 2 > Config.dimension[this.type].max) {
+    if (this.obj.scale.x * 2 > Config.dimension[this.type].max) {
       this.obj.scale.x = parseInt(Config.dimension[this.type].max) / 2;
-    } else if(this.obj.scale.x * 2 < Config.dimension[this.type].min) {
+    } else if (this.obj.scale.x * 2 < Config.dimension[this.type].min) {
       this.obj.scale.x = parseInt(Config.dimension[this.type].min) / 2;
     } else {
-      this.obj.position.x = this.obj.position.x - (this.stepSize / 2);
+      this.obj.position.x = this.obj.position.x - this.stepSize / 2;
     }
 
-    if(this.collision) {
-      this.obj.scale.x = this.obj.scale.x - (this.stepSize / 2);
-      this.obj.position.x = this.obj.position.x + (this.stepSize / 2);
+    this.obj.box.setFromObject(this.obj);
+    this.collision = this.checkCollision(this.app && this.app.fields);
+
+    if (this.collision) {
+      this.obj.scale.x -= this.stepSize / 2;
+      // this.obj.position.x += (this.stepSize / 2);
     }
 
     this.updateBoxSize(this.obj);
   }
 
   removeSection() {
-    this.obj.scale.x = this.obj.scale.x - (this.stepSize / 2);
+    this.obj.scale.x = this.obj.scale.x - this.stepSize / 2;
 
-    if(this.obj.scale.x * 2 > Config.dimension[this.type].max) {
+    if (this.obj.scale.x * 2 > Config.dimension[this.type].max) {
       this.obj.scale.x = parseInt(Config.dimension[this.type].max) / 2;
-    } else if(this.obj.scale.x * 2 < Config.dimension[this.type].min) {
+    } else if (this.obj.scale.x * 2 < Config.dimension[this.type].min) {
       this.obj.scale.x = parseInt(Config.dimension[this.type].min) / 2;
     } else {
       this.obj.position.x = this.obj.position.x + this.stepSize / 2;
@@ -258,23 +279,34 @@ export default class Model {
   drawLines() {
     // this.updateBoxSize();
 
-    let stepsCount = (this.field.direction == 'vertical' ? this.obj.size.x : this.obj.size.z) / this.stepSize;
-    let baseLineX = this.field.direction == 'vertical' ? (this.obj.position.x + (this.obj.size.x / 2)) : (this.obj.position.x + (this.obj.size.z / 2));
+    let stepsCount =
+      (this.field.direction == "vertical" ? this.obj.size.x : this.obj.size.z) /
+      this.stepSize;
+    let baseLineX =
+      this.field.direction == "vertical"
+        ? this.obj.position.x + this.obj.size.x / 2
+        : this.obj.position.x + this.obj.size.z / 2;
 
     //remove lines
     this.stepLines.forEach((line) => {
-        this.obj.group.remove(line);
+      this.obj.group.remove(line);
     });
 
-    for(let i = 0; i <= stepsCount; i++) {
+    for (let i = 0; i <= stepsCount; i++) {
       let line = this.obj.baseLine.clone();
-      line.position.set(baseLineX - (i * this.stepSize), this.obj.position.y, this.obj.position.z);
+      line.position.set(
+        baseLineX - i * this.stepSize,
+        this.obj.position.y,
+        this.obj.position.z
+      );
       this.stepLines.push(line);
       this.obj.group.add(line);
     }
   }
 
   render(app, time) {
+    !this.app && (this.app = app);
+
     // Update position
     this.obj.box.setFromObject(this.obj);
     this.collision = this.checkCollision(app.fields);
@@ -288,7 +320,7 @@ export default class Model {
     if (this.ghost) {
       this.obj.material.opacity = 0.5;
       this.obj.type = "ghost";
-    } else if(this.marked) {
+    } else if (this.marked) {
       this.obj.material.opacity = 0.2;
     } else {
       this.obj.material.opacity = 1;

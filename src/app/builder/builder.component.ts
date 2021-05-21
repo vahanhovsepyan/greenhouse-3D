@@ -322,6 +322,9 @@ export class BuilderComponent implements OnInit {
     });
     this.ghostField = ghostField;
 
+    // all selectedElements
+    this.selectedElements = this.getSelectedBays();
+
     // Update tools position
     this.tools.update();
 

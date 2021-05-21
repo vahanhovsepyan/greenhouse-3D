@@ -49,7 +49,7 @@ export class CanvasBuilderComponent implements OnInit {
     // size * the device pixel ratio.
     canvas.width = width * this.scale;
     canvas.height = height * this.scale;
-    
+
     return canvas.getContext('2d');
   }
 
@@ -77,35 +77,42 @@ export class CanvasBuilderComponent implements OnInit {
 
     this.blocks.production.forEach((object) => {
       this.ctx.beginPath();
+      this.ctx.strokeStyle = "black";
       this.ctx.fillStyle = 'white';
-      this.ctx.rect(object.x, object.y, object.width, object.height);
+      this.ctx.rect(object.x - (object.width / 2), object.y - (object.height / 2), object.width, object.height);
       this.ctx.fill();
+      this.ctx.stroke();
     });
 
     this.blocks.technical.forEach((object) => {
       this.ctx.beginPath();
+      this.ctx.strokeStyle = "black";
       this.ctx.fillStyle = 'blue';
-      this.ctx.rect(object.x, object.y, object.width, object.height);
+      this.ctx.rect(object.x - (object.width / 2), object.y - (object.height / 2), object.width, object.height);
       this.ctx.fill();
+      this.ctx.stroke();
     });
 
     this.blocks.corridor.forEach((object) => {
       this.ctx.beginPath();
+      this.ctx.strokeStyle = "black";
       this.ctx.fillStyle = 'grey';
-      this.ctx.rect(object.x, object.y, object.width, object.height);
+      this.ctx.rect(object.x - (object.width / 2), object.y - (object.height / 2), object.width, object.height);
       this.ctx.fill();
+      this.ctx.stroke();
     });
 
     this.blocks.heat.forEach((object) => {
       this.ctx.beginPath();
+      this.ctx.strokeStyle = "black";
       this.ctx.fillStyle = 'red';
       this.ctx.arc(object.x, object.y, object.width / 2, 0, 2 * Math.PI);
       this.ctx.fill();
+      this.ctx.stroke();
     });
   }
 
   ngOnChanges() {
-
     this.blocks = {
       production: [],
       technical: [],
@@ -116,10 +123,11 @@ export class CanvasBuilderComponent implements OnInit {
     if (!this.data.blocks) return;
 
     this.data.blocks.forEach((block) => {
+      console.log(block);
       block.elements.forEach((element) => {
         let config = {
-          x: this.origin.x - block.z - element.z,
-          y: this.origin.y + block.x + element.x,
+          x: block.direction == 'vertical' ? this.origin.x - (block.z + element.z) * this.scale : this.origin.x - (block.z - (- element.x)) * this.scale,
+          y: block.direction == 'vertical' ? this.origin.y + (block.x + element.x) * this.scale : this.origin.y + (block.x + element.z) * this.scale,
           width: element.size.z * this.scale,
           height: element.size.x * this.scale,
           fill: "red",

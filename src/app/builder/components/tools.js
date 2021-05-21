@@ -89,7 +89,7 @@ export default class Tools {
         bay.obj.scale.z
       );
 
-      field.clone(clonedBay);
+      field.clone(clonedBay, true);
     });
     this.app.deselectAllBays();
     this.app.fields.push(field);

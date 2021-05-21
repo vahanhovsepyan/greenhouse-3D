@@ -21,6 +21,7 @@ export default class Field {
     this.group = new THREE.Group();
     this.ghost = ghost;
     this.tmpPosition = new THREE.Vector3();
+    this.rotationLastPosition = null;
     this.collision = false;
 
     this.bays = [];
@@ -104,6 +105,7 @@ export default class Field {
   rotate() {
     this.direction = this.direction == "vertical" ? "horizontal" : "vertical";
     this.deselectAllBays();
+    this.rotationLastPosition = new THREE.Vector3(this.group.position.x, this.group.position.y, this.group.position.z);
     this.ghost = true;
 
     switch (this.direction) {
@@ -153,7 +155,7 @@ export default class Field {
     this.update();
   }
 
-  clone(bay) {
+  clone(bay, copy) {
     let baysCount = this.bays.length;
     let baysWidth =
       this.direction == "vertical" ? bay.obj.size.z : bay.obj.size.x;
@@ -172,23 +174,33 @@ export default class Field {
     this.group.add(bay.obj.group);
     this.bays.splice(bay.index, 0, bay);
 
-    setTimeout(() => {
-      // check if there's collision for duplicated bays
-      bay.obj.box.setFromObject(bay.obj);
-      bay.collision = bay.checkCollision(this.app && this.app.fields);
+    if (!copy) {
+      setTimeout(() => {
+        // check if there's collision for duplicated bays
+        bay.obj.box.setFromObject(bay.obj);
+        bay.collision = bay.checkCollision(this.app && this.app.fields);
 
-      if (bay.collision) {
-        this.remove(bay);
-        this.app.toast.open(`You can't duplicate another ${bay.type} bay.`);
-      } else {
-        this.repositionBays();
-        this.update();
-      }
-    }, 10);
+        if (bay.collision) {
+          this.remove(bay);
+          this.app.toast.open(`You can't duplicate another ${bay.type} bay.`);
+        } else {
+          this.repositionBays();
+          this.update();
+        }
+      }, 50);
+    }
   }
 
   removeField() {
-    this.scene.remove(this.group);
+    const fieldGroup = this.group;
+
+    this.scene.remove(fieldGroup);
+    this.app.fields.splice(
+      this.app.fields.findIndex(function (i) {
+        return i.group.uuid === fieldGroup.uuid;
+      }),
+      1
+    );
   }
 
   removeAllBays() {

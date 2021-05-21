@@ -64,9 +64,25 @@ export default class Events {
       this.controls.ctrl = trueOrFalse;
     }
     if (evt.key === "Escape") {
-      this.app.ghostField && this.app.ghostField.removeAllBays();
+
+      if(this.app.ghostField && this.app.ghostField.rotationLastPosition) {
+        this.app.ghostField.group.position.copy(this.app.ghostField.rotationLastPosition);
+
+        if(this.app.ghostField.direction == 'horizontal') {
+          this.app.ghostField.group.applyMatrix4(
+            new THREE.Matrix4().makeRotationY(-Math.PI / 2)
+          );
+        } else {
+          this.app.ghostField.group.applyMatrix4(new THREE.Matrix4().makeRotationY(Math.PI / 2));
+        }
+        this.app.ghostField.ghost = false;
+        this.app.ghostField.rotationLastPosition = null;
+      } else {
+        this.app.ghostField && this.app.ghostField.removeAllBays();
+      }
     }
     if (evt.key === "Backspace") {
+      debugger;
       this.app.selectedElements.forEach((el) => {
         el.field.remove(el);
       })
@@ -128,33 +144,43 @@ export default class Events {
 
           if (!this.controls.ctrl) {
             if (!intersect.object.selected) {
-              that.deselectAllBays();
-              intersect.object.proto.field.selectAllBays();
+
+              if(intersect.object.proto.field.selectedBays.length) {
+                that.deselectAllBays();
+                intersect.object.proto.getSelected();
+              } else {
+                that.deselectAllBays();
+                intersect.object.proto.field.selectAllBays();
+              }
             } else {
               intersect.object.proto.field.deselectAllBays();
               intersect.object.proto.getSelected();
-
-              that.selectedElements = that.getSelectedBays();
             }
           } else {
             if (!intersect.object.selected)
               intersect.object.proto.getSelected();
             else intersect.object.proto.getUnselected();
           }
-
-          that.selectedElements = that.getSelectedBays();
         } else if (
           that.ghostField &&
           !that.ghostField.collision &&
           intersect.object.type == "ground"
         ) {
           that.ghostField.ghost = false;
+
+          if(that.ghostField.rotationLastPosition) {
+            that.ghostField.rotationLastPosition = null;
+          }
         } else if (
           that.ghostField &&
           !that.ghostField.collision &&
           intersect.object.type == "ghost"
         ) {
           that.ghostField.ghost = false;
+
+          if(that.ghostField.rotationLastPosition) {
+            that.ghostField.rotationLastPosition = null;
+          }
         }
         breakLoop = true;
       }

@@ -137,7 +137,11 @@ export default class InfoBox {
     let count = [];
 
     this.app.selectedElements.forEach((el) => {
-      count.push(parseInt(el.obj.size.x));
+      if(el.field.direction === 'vertical') {
+        count.push(parseInt(el.obj.size.x));
+      } else {
+        count.push(parseInt(el.obj.size.z));
+      }
     });
 
     this.data.selectedBayLength = count;
@@ -170,7 +174,11 @@ export default class InfoBox {
   }
 
   selectedCorridorLength() {
-    this.data.selectedCorridorLength = parseFloat(this.app.selectedElements[0].obj.size.x).toFixed(2);
+    if(this.app.selectedElements[0].field.direction === 'vertical') {
+      this.data.selectedCorridorLength = parseFloat(this.app.selectedElements[0].obj.size.x).toFixed(2);
+    } else {
+      this.data.selectedCorridorLength = parseFloat(this.app.selectedElements[0].obj.size.z).toFixed(2);
+    }
   }
 
   selectedCorridorSurface() {
