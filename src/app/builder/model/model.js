@@ -16,6 +16,9 @@ export default class Model {
     this.marked = false;
     this.ref = null;
     this.field = null;
+    this.state = {
+      moving: false
+    }
     this.dimension =
       (dimension && dimension.dimension) ||
       Object.assign({}, Config.dimension[this.type]);
@@ -75,7 +78,7 @@ export default class Model {
         this.dimension.height,
         this.dimension.width / 2
       );
-      this.initLines(group);
+      // this.initLines(group);
     }
     this.ref = group;
 
@@ -164,6 +167,7 @@ export default class Model {
       fields.map((field) => {
         if (self.field.geo.uuid != field.geo.uuid) {
           field.bays.map((bay) => {
+            // console.log(self.obj.box.distanceToPoint( bay.obj.position ));
             if (self.obj.uuid !== bay.obj.uuid) {
               staticCollideMesh.push(bay);
             }
@@ -177,8 +181,8 @@ export default class Model {
       }
     });
     if (boxesCollision && !this.ghost && this.obj.selected) {
-      self.obj.position.copy(self.tmpPosition);
-      self.field.group.position.copy(self.field.tmpPosition);
+      // self.obj.position.copy(self.tmpPosition);
+      // self.field.group.position.copy(self.field.tmpPosition);
     }
     self.field.collision = boxesCollision;
 
@@ -210,26 +214,31 @@ export default class Model {
 
   changePosition(point, mouseDown) {
     let coords = {
-      x: (point.x - this.field.group.position.x) / 111,
-      z: (point.z - this.field.group.position.z) / 111,
+      x: (point.x - this.field.group.position.x) / 100,
+      z: (point.z - this.field.group.position.z) / 100,
     };
     let direction = this.field.direction;
     let speed = this.speedWalking / this.field.bays.length;
 
+    !this.collision && this.tmpPosition.copy(this.obj.position);
+
     if (this.obj.selected && mouseDown && this.isFieldSelected()) {
       if (direction == "vertical") {
-        this.field.group.translateX(coords.x * speed * this.time);
-        this.field.group.translateZ(coords.z * speed * this.time);
+        this.field.group.translateX(coords.x * speed);
+        this.field.group.translateZ(coords.z * speed);
       } else {
-        this.field.group.translateX(coords.z * speed * this.time);
-        this.field.group.translateZ(-coords.x * speed * this.time);
+        this.field.group.translateX(coords.z * speed);
+        this.field.group.translateZ(-coords.x * speed);
       }
     } else if (this.obj.selected && mouseDown) {
       direction == "vertical" &&
-        this.obj.translateX(coords.x * speed * 5 * this.time);
+        this.obj.translateX(coords.x * speed * this.time);
       direction == "horizontal" &&
-        this.obj.translateX(coords.z * speed * 5 * this.time);
+        this.obj.translateX(coords.z * speed * this.time);
     }
+
+    this.obj.box.setFromObject(this.obj);
+    this.collision = this.checkCollision(this.app.fields);
   }
 
   addSection() {
@@ -307,10 +316,13 @@ export default class Model {
   render(app, time) {
     !this.app && (this.app = app);
 
-    // Update position
     this.obj.box.setFromObject(this.obj);
-    this.collision = this.checkCollision(app.fields);
-    this.tmpPosition.copy(this.obj.position);
+
+    // Update position
+    if(this.state.moving) {
+      // this.collision = this.checkCollision(app.fields);
+      // this.tmpPosition.copy(this.obj.position); 
+    }
 
     if (this.obj.selected && this.isFieldSelected()) {
       this.updateFieldMovement(app.events, time);
@@ -322,6 +334,9 @@ export default class Model {
       this.obj.type = "ghost";
     } else if (this.marked) {
       this.obj.material.opacity = 0.2;
+    } else if (this.collision) {
+      this.obj.material.opacity = 0.5;
+      this.obj.position.copy(this.tmpPosition);
     } else {
       this.obj.material.opacity = 1;
       this.obj.type = "bay";

@@ -263,10 +263,11 @@ export default class Field {
     let check = false;
     this.bays.forEach((bay) => {
       if (bay.collision) {
-        this.group.position.copy(this.tmpPosition);
         check = true;
       }
     });
+    check && this.group.position.copy(this.tmpPosition);
+    !check && this.tmpPosition.copy(this.group.position);
     return check;
   }
 
@@ -274,14 +275,16 @@ export default class Field {
     this.app = app;
     this.selectedBays = [];
 
-    this.bays.forEach((bay, index) => {
+    this.bays.forEach((bay) => {
       bay.ghost = this.ghost;
       if (bay.obj.selected) {
         this.selectedBays.push(bay);
       }
     });
 
-    this.checkBaysCollision();
+    if(this.checkBaysCollision()) {
+      this.group.position.copy(this.tmpPosition);
+    }
 
     if (this.ghost) {
       app.raycaster
@@ -289,7 +292,6 @@ export default class Field {
         .forEach((intersect) => {
           if (intersect.object.type == "ground") {
             this.group.position.set(intersect.point.x, 0, intersect.point.z);
-            this.tmpPosition.copy(intersect.point);
           }
         });
     }

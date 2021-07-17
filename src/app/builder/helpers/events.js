@@ -81,8 +81,7 @@ export default class Events {
         this.app.ghostField && this.app.ghostField.removeAllBays();
       }
     }
-    if (evt.key === "Backspace") {
-      debugger;
+    if (evt.key === "Backspace" || evt.key === "Delete") {
       this.app.selectedElements.forEach((el) => {
         el.field.remove(el);
       })
@@ -113,6 +112,7 @@ export default class Events {
         if (intersect.object.type == "ground") {
           that.selectedElements &&
             that.selectedElements.forEach((el) => {
+              el.state.moving = true;
               el.changePosition(intersect.point, this.mouseDown);
             });
         } else if (intersect.object.type == "back-control") {
@@ -201,6 +201,11 @@ export default class Events {
     intersects.forEach((intersect) => {
       if (!breakLoop) {
         if (intersect.object.type == "ground") {
+          // reseting the state
+          that.selectedElements.forEach((el) => {
+            el.state.moving = false;
+          });
+
           // Unselect all bays if clicked away
           that.deselectAllBays();
           that.selectedElements = [];

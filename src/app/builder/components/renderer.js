@@ -15,7 +15,7 @@ export default class Renderer {
     this.threeRenderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 
     // Set clear color to fog to enable fog or to hex color for no fog
-    this.threeRenderer.setPixelRatio(window.devicePixelRatio); // For retina
+    // this.threeRenderer.setPixelRatio(window.devicePixelRatio); // For retina
 
     // Appends canvas
     container.appendChild(this.threeRenderer.domElement);
